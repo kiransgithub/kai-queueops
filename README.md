@@ -8,7 +8,7 @@ An open-source queue lifecycle and resource operations console for [KAI Schedule
 
 ## How it fits
 
-![Animated KAI QueueOps architecture flow](./public/media/kai-queueops-flow.gif)
+![Animated KAI QueueOps architecture flow](./public/media/kai-queueops-flow.svg)
 
 Blue shows queue-policy administration, magenta is the native workload scheduling path, green returns live status and utilization, and amber records administrative changes. KAI QueueOps manages and observes queue policy; KAI Scheduler remains responsible for workload placement.
 
