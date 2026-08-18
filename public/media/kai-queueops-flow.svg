@@ -52,6 +52,7 @@
       .card-subtitle { fill: #9eb6ce; font-size: 14px; font-weight: 500; }
       .item-title { fill: #eef7ff; font-size: 15px; font-weight: 700; }
       .item-copy { fill: #91abc5; font-size: 12px; font-weight: 500; }
+      .item-copy.compact { font-size: 11px; }
       .label { font-size: 12px; font-weight: 750; letter-spacing: 0.4px; }
       .flow-line { fill: none; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 10 12; animation: dash 1.25s linear infinite; }
       .flow-line.slow { animation-duration: 1.75s; }
@@ -126,8 +127,8 @@
     <text x="126" y="449" class="item-copy">Platform · SRE · FinOps</text>
     <line x1="72" y1="475" x2="269" y2="475" stroke="#2d4d6c"/>
     <text x="72" y="507" class="item-title">Intent</text>
-    <text x="125" y="507" class="item-copy">fairness · guardrails · capacity</text>
-    <text x="72" y="531" class="item-copy">No direct YAML required for daily operations</text>
+    <text x="125" y="507" class="item-copy">fairness · guardrails</text>
+    <text x="72" y="531" class="item-copy">Capacity planning · no direct YAML</text>
   </g>
 
   <!-- QueueOps -->
@@ -142,24 +143,27 @@
     <g transform="translate(356 440)">
       <rect width="137" height="70" rx="14" fill="#0a213d" stroke="#31557a"/>
       <text x="15" y="27" class="item-title">Lifecycle</text>
-      <text x="15" y="49" class="item-copy">Create · Update · Delete</text>
+      <text x="15" y="47" class="item-copy compact">Create · Update</text>
+      <text x="15" y="63" class="item-copy compact">Delete</text>
     </g>
     <g transform="translate(507 440)">
       <rect width="135" height="70" rx="14" fill="#0a213d" stroke="#31557a"/>
       <text x="15" y="27" class="item-title">Resources</text>
-      <text x="15" y="49" class="item-copy">CPU · RAM · GPU · I/O</text>
+      <text x="15" y="47" class="item-copy compact">CPU · RAM</text>
+      <text x="15" y="63" class="item-copy compact">GPU · I/O</text>
     </g>
     <g transform="translate(356 524)">
       <rect width="137" height="82" rx="14" fill="#0a213d" stroke="#31557a"/>
       <text x="15" y="27" class="item-title">Governance</text>
-      <text x="15" y="49" class="item-copy">Hierarchy · Quotas</text>
-      <text x="15" y="66" class="item-copy">Limits · Oversubscription</text>
+      <text x="15" y="47" class="item-copy compact">Hierarchy · Quotas</text>
+      <text x="15" y="62" class="item-copy compact">Limits</text>
+      <text x="15" y="77" class="item-copy compact">Oversubscription</text>
     </g>
     <g transform="translate(507 524)">
       <rect width="135" height="82" rx="14" fill="#0a213d" stroke="#31557a"/>
       <text x="15" y="27" class="item-title">Visibility</text>
-      <text x="15" y="49" class="item-copy">Demand · Allocation</text>
-      <text x="15" y="66" class="item-copy">Utilization · Events</text>
+      <text x="15" y="47" class="item-copy compact">Demand · Allocation</text>
+      <text x="15" y="62" class="item-copy compact">Utilization · Events</text>
     </g>
   </g>
 
@@ -172,11 +176,12 @@
       <text x="46" y="23" class="item-title">Queue CRDs</text>
       <text x="46" y="41" class="item-copy">scheduling.run.ai/v2</text>
     </g>
-    <g transform="translate(754 479)">
-      <rect width="210" height="52" rx="13" fill="#132f50" stroke="#396080"/>
+    <g transform="translate(754 474)">
+      <rect width="210" height="66" rx="13" fill="#132f50" stroke="#396080"/>
       <circle cx="25" cy="26" r="10" fill="#f044a5" fill-opacity="0.2" stroke="#f044a5"/>
-      <text x="46" y="23" class="item-title">Pods &amp; Workloads</text>
-      <text x="46" y="41" class="item-copy">queue label + schedulerName</text>
+      <text x="46" y="22" class="item-title">Pods &amp; Workloads</text>
+      <text x="46" y="41" class="item-copy compact">queue label</text>
+      <text x="46" y="56" class="item-copy compact">scheduler: kai-scheduler</text>
     </g>
   </g>
 
@@ -237,17 +242,19 @@
       <rect width="93" height="27" rx="13.5" fill="#f044a5" fill-opacity="0.15" stroke="#f044a5" stroke-opacity="0.55"/>
       <text x="46.5" y="18" text-anchor="middle" class="label" fill="#ff8dca">INFERENCE</text>
     </g>
-    <text x="24" y="106" class="item-copy">Jobs · Pods · Ray · PyTorch · Deployments</text>
+    <text x="24" y="103" class="item-copy compact">Jobs · Pods · Ray · PyTorch</text>
+    <text x="24" y="119" class="item-copy compact">Deployments</text>
   </g>
 
   <!-- Audit store -->
   <g transform="translate(367 682)">
-    <rect width="264" height="76" rx="20" fill="#2b261c" stroke="#ffb84d" stroke-opacity="0.72"/>
+    <rect width="264" height="90" rx="20" fill="#2b261c" stroke="#ffb84d" stroke-opacity="0.72"/>
     <ellipse cx="38" cy="25" rx="16" ry="7" fill="#ffb84d" fill-opacity="0.25" stroke="#ffb84d"/>
     <path d="M22 25v25c0 9 32 9 32 0V25" fill="none" stroke="#ffb84d" stroke-width="2"/>
     <path d="M22 37c0 9 32 9 32 0M22 48c0 9 32 9 32 0" fill="none" stroke="#ffb84d" stroke-width="2"/>
-    <text x="71" y="31" class="item-title">PostgreSQL audit trail</text>
-    <text x="71" y="52" class="item-copy">Who · What · When · Before / After</text>
+    <text x="71" y="29" class="item-title">PostgreSQL audit trail</text>
+    <text x="71" y="51" class="item-copy compact">Actor · Action · Timestamp</text>
+    <text x="71" y="68" class="item-copy compact">Before / After state</text>
   </g>
 
   <!-- Flow paths -->
