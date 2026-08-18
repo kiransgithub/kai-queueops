@@ -1,0 +1,142 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: kai-queueops-test
+  labels:
+    app.kubernetes.io/part-of: kai-queueops
+---
+apiVersion: scheduling.run.ai/v2
+kind: Queue
+metadata:
+  name: ai-platform
+  labels:
+    owner: platform
+    environment: local
+spec:
+  displayName: AI Platform
+  priority: 200
+  preemptMinRuntime: 5m
+  reclaimMinRuntime: 2m
+  resources:
+    cpu:
+      quota: 12000
+      limit: 30000
+      overQuotaWeight: 2
+    memory:
+      quota: 12000
+      limit: 19000
+      overQuotaWeight: 2
+    gpu:
+      quota: 0
+      limit: 0
+      overQuotaWeight: 1
+---
+apiVersion: scheduling.run.ai/v2
+kind: Queue
+metadata:
+  name: model-training
+  labels:
+    owner: research
+    environment: local
+spec:
+  displayName: Model Training
+  parentQueue: ai-platform
+  priority: 180
+  resources:
+    cpu:
+      quota: 4000
+      limit: 10000
+      overQuotaWeight: 3
+    memory:
+      quota: 4096
+      limit: 8192
+      overQuotaWeight: 3
+    gpu:
+      quota: 0
+      limit: 0
+      overQuotaWeight: 1
+---
+apiVersion: scheduling.run.ai/v2
+kind: Queue
+metadata:
+  name: batch-evaluation
+  labels:
+    owner: ml-quality
+    environment: local
+spec:
+  displayName: Batch Evaluation
+  parentQueue: ai-platform
+  priority: 100
+  resources:
+    cpu:
+      quota: 2000
+      limit: 6000
+      overQuotaWeight: 1
+    memory:
+      quota: 3072
+      limit: 6144
+      overQuotaWeight: 1
+    gpu:
+      quota: 0
+      limit: 0
+      overQuotaWeight: 1
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: training-workers
+  namespace: kai-queueops-test
+  labels:
+    app: training-workers
+    kai.scheduler/queue: model-training
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: training-workers
+  template:
+    metadata:
+      labels:
+        app: training-workers
+        kai.scheduler/queue: model-training
+    spec:
+      schedulerName: kai-scheduler
+      containers:
+        - name: worker
+          image: busybox:1.36
+          command: ["sh", "-c", "while true; do echo training; sleep 300; done"]
+          resources:
+            requests:
+              cpu: 500m
+              memory: 128Mi
+            limits:
+              cpu: "1"
+              memory: 256Mi
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: evaluation-job
+  namespace: kai-queueops-test
+  labels:
+    kai.scheduler/queue: batch-evaluation
+spec:
+  backoffLimit: 1
+  template:
+    metadata:
+      labels:
+        kai.scheduler/queue: batch-evaluation
+    spec:
+      schedulerName: kai-scheduler
+      restartPolicy: Never
+      containers:
+        - name: evaluator
+          image: busybox:1.36
+          command: ["sh", "-c", "echo evaluating; sleep 1800"]
+          resources:
+            requests:
+              cpu: 250m
+              memory: 64Mi
+            limits:
+              cpu: 500m
+              memory: 128Mi

@@ -1,0 +1,26 @@
+{
+  "branding": {
+    "appName": "KAI QueueOps",
+    "shortName": "KAI",
+    "productLabel": "QUEUEOPS",
+    "accentColor": "#8fcb58"
+  },
+  "identity": {
+    "fallbackDisplayName": "Local Administrator",
+    "fallbackRole": "Cluster administrator"
+  },
+  "links": {
+    "helpUrl": "https://github.com/kai-scheduler/KAI-Scheduler/tree/main/docs",
+    "queueDocsUrl": "https://github.com/kai-scheduler/KAI-Scheduler/blob/main/docs/queues/README.md",
+    "supportEmail": ""
+  },
+  "features": {
+    "showAudit": true,
+    "showCluster": true,
+    "showRecentChanges": true,
+    "showExtendedTelemetry": true
+  },
+  "behavior": {
+    "refreshIntervalSeconds": 10
+  }
+}

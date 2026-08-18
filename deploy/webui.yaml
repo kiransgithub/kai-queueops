@@ -1,0 +1,144 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: kai-queueops
+  namespace: kai-scheduler
+  labels:
+    app.kubernetes.io/name: kai-queueops
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: kai-queueops
+rules:
+  - apiGroups: ["scheduling.run.ai"]
+    resources: ["queues"]
+    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+  - apiGroups: ["scheduling.run.ai"]
+    resources: ["podgroups"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: [""]
+    resources: ["nodes", "pods"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["metrics.k8s.io"]
+    resources: ["pods"]
+    verbs: ["get", "list"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: kai-queueops
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: kai-queueops
+subjects:
+  - kind: ServiceAccount
+    name: kai-queueops
+    namespace: kai-scheduler
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kai-queueops
+  namespace: kai-scheduler
+  labels:
+    app.kubernetes.io/name: kai-queueops
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: kai-queueops
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: kai-queueops
+    spec:
+      serviceAccountName: kai-queueops
+      automountServiceAccountToken: true
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: webui
+          image: ghcr.io/your-org/kai-queueops:0.1.0
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 3000
+          env:
+            - name: KAI_DATA_MODE
+              value: kubernetes
+            - name: APP_CONFIG_FILE
+              value: /app/config/ui.config.json
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: kai-queueops-secrets
+                  key: database-url
+            - name: TRUSTED_AUTH_PROXY
+              value: "true"
+            - name: TRUSTED_AUTH_HEADER
+              value: x-auth-request-user
+          readinessProbe:
+            httpGet:
+              path: /api/health
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /api/live
+              port: http
+            initialDelaySeconds: 15
+            periodSeconds: 20
+          resources:
+            requests:
+              cpu: 100m
+              memory: 192Mi
+            limits:
+              cpu: "1"
+              memory: 512Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+            - name: ui-config
+              mountPath: /app/config/ui.config.json
+              subPath: ui.config.json
+              readOnly: true
+      volumes:
+        - name: tmp
+          emptyDir: {}
+        - name: ui-config
+          configMap:
+            name: kai-queueops-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: kai-queueops
+  namespace: kai-scheduler
+spec:
+  selector:
+    app.kubernetes.io/name: kai-queueops
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: kai-queueops
+  namespace: kai-scheduler
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: kai-queueops

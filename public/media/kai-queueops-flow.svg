@@ -1,0 +1,295 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900" role="img" aria-labelledby="title description">
+  <title id="title">How KAI QueueOps works with KAI Scheduler</title>
+  <desc id="description">An animated architecture diagram showing administrators managing queue policies through KAI QueueOps, AI workloads being scheduled by KAI Scheduler, cluster status returning to QueueOps, and audit records stored in PostgreSQL.</desc>
+  <defs>
+    <linearGradient id="background" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#06182d"/>
+      <stop offset="0.55" stop-color="#0a2340"/>
+      <stop offset="1" stop-color="#08172b"/>
+    </linearGradient>
+    <linearGradient id="queueopsCard" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#143a67"/>
+      <stop offset="1" stop-color="#0d2849"/>
+    </linearGradient>
+    <linearGradient id="clusterCard" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#102d4e"/>
+      <stop offset="1" stop-color="#0b213d"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="14" stdDeviation="18" flood-color="#020914" flood-opacity="0.45"/>
+    </filter>
+    <filter id="blueGlow" x="-100%" y="-100%" width="300%" height="300%">
+      <feGaussianBlur stdDeviation="5" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="pinkGlow" x="-100%" y="-100%" width="300%" height="300%">
+      <feGaussianBlur stdDeviation="5" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="greenGlow" x="-100%" y="-100%" width="300%" height="300%">
+      <feGaussianBlur stdDeviation="5" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <marker id="arrowBlue" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L10,5 L0,10 z" fill="#45a3ff"/>
+    </marker>
+    <marker id="arrowPink" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L10,5 L0,10 z" fill="#f044a5"/>
+    </marker>
+    <marker id="arrowGreen" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L10,5 L0,10 z" fill="#32d6a0"/>
+    </marker>
+    <marker id="arrowAmber" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L10,5 L0,10 z" fill="#ffb84d"/>
+    </marker>
+    <style>
+      text { font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif; }
+      .eyebrow { fill: #8fa8c2; font-size: 14px; font-weight: 750; letter-spacing: 2.5px; }
+      .title { fill: #f7fbff; font-size: 38px; font-weight: 780; letter-spacing: -0.7px; }
+      .subtitle { fill: #a9bfd4; font-size: 18px; font-weight: 450; }
+      .section { fill: #8fa8c2; font-size: 13px; font-weight: 750; letter-spacing: 2px; }
+      .card-title { fill: #f7fbff; font-size: 22px; font-weight: 750; }
+      .card-subtitle { fill: #9eb6ce; font-size: 14px; font-weight: 500; }
+      .item-title { fill: #eef7ff; font-size: 15px; font-weight: 700; }
+      .item-copy { fill: #91abc5; font-size: 12px; font-weight: 500; }
+      .label { font-size: 12px; font-weight: 750; letter-spacing: 0.4px; }
+      .flow-line { fill: none; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 10 12; animation: dash 1.25s linear infinite; }
+      .flow-line.slow { animation-duration: 1.75s; }
+      .node-pulse { animation: pulse 2.8s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
+      .resource-live { animation: live 2.4s ease-in-out infinite; }
+      .resource-live.delay-1 { animation-delay: -0.8s; }
+      .resource-live.delay-2 { animation-delay: -1.6s; }
+      .halo { animation: halo 2.8s ease-out infinite; transform-box: fill-box; transform-origin: center; }
+      @keyframes dash { to { stroke-dashoffset: -44; } }
+      @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.78; } }
+      @keyframes live { 0%, 100% { opacity: 0.45; } 50% { opacity: 1; } }
+      @keyframes halo { 0% { opacity: 0.6; transform: scale(0.94); } 70%, 100% { opacity: 0; transform: scale(1.15); } }
+      @media (prefers-reduced-motion: reduce) {
+        .flow-line, .node-pulse, .resource-live, .halo { animation: none; }
+      }
+    </style>
+  </defs>
+
+  <rect width="1600" height="900" fill="url(#background)"/>
+  <circle cx="1440" cy="80" r="300" fill="#174c75" opacity="0.12"/>
+  <circle cx="160" cy="840" r="300" fill="#8e2a78" opacity="0.08"/>
+  <path d="M0 105 H1600" stroke="#33516e" stroke-opacity="0.45"/>
+
+  <g transform="translate(58 36)">
+    <rect x="0" y="0" width="52" height="52" rx="15" fill="#45a3ff"/>
+    <path d="M13 26h26M26 13v26M17 18l18 18M35 18L17 36" stroke="#06182d" stroke-width="4" stroke-linecap="round"/>
+    <text x="68" y="33" fill="#f7fbff" font-size="25" font-weight="780">KAI QueueOps</text>
+    <text x="270" y="33" fill="#6f8ba7" font-size="14" font-weight="650">OPERATIONS LAYER</text>
+  </g>
+
+  <text x="800" y="157" text-anchor="middle" class="eyebrow">HOW IT WORKS</text>
+  <text x="800" y="205" text-anchor="middle" class="title">Govern the queues. Keep KAI scheduling.</text>
+  <text x="800" y="238" text-anchor="middle" class="subtitle">Queue policy, utilization and auditability around the native KAI scheduling path.</text>
+
+  <g transform="translate(460 266)">
+    <rect width="156" height="32" rx="16" fill="#45a3ff" fill-opacity="0.13" stroke="#45a3ff" stroke-opacity="0.45"/>
+    <circle cx="18" cy="16" r="5" fill="#45a3ff"/>
+    <text x="32" y="21" class="label" fill="#87c7ff">QUEUE POLICY</text>
+  </g>
+  <g transform="translate(628 266)">
+    <rect width="174" height="32" rx="16" fill="#f044a5" fill-opacity="0.12" stroke="#f044a5" stroke-opacity="0.42"/>
+    <circle cx="18" cy="16" r="5" fill="#f044a5"/>
+    <text x="32" y="21" class="label" fill="#ff8dca">WORKLOAD PATH</text>
+  </g>
+  <g transform="translate(814 266)">
+    <rect width="154" height="32" rx="16" fill="#32d6a0" fill-opacity="0.12" stroke="#32d6a0" stroke-opacity="0.42"/>
+    <circle cx="18" cy="16" r="5" fill="#32d6a0"/>
+    <text x="32" y="21" class="label" fill="#77e8c0">LIVE STATUS</text>
+  </g>
+  <g transform="translate(980 266)">
+    <rect width="130" height="32" rx="16" fill="#ffb84d" fill-opacity="0.12" stroke="#ffb84d" stroke-opacity="0.42"/>
+    <circle cx="18" cy="16" r="5" fill="#ffb84d"/>
+    <text x="32" y="21" class="label" fill="#ffd08a">AUDIT</text>
+  </g>
+
+  <!-- Main cards -->
+  <g filter="url(#shadow)">
+    <rect x="48" y="354" width="245" height="202" rx="24" fill="#0d2746" stroke="#2c4c6c"/>
+    <rect x="330" y="334" width="338" height="302" rx="28" fill="url(#queueopsCard)" stroke="#45a3ff" stroke-width="2"/>
+    <rect x="728" y="354" width="262" height="202" rx="24" fill="#0d2746" stroke="#2c4c6c"/>
+    <rect x="1049" y="334" width="254" height="302" rx="28" fill="#08233f" stroke="#f044a5" stroke-width="2"/>
+    <rect x="1354" y="320" width="198" height="330" rx="28" fill="url(#clusterCard)" stroke="#37617f"/>
+  </g>
+
+  <!-- Admins -->
+  <g>
+    <text x="72" y="387" class="section">PLATFORM TEAM</text>
+    <circle cx="93" cy="432" r="22" fill="#173c63" stroke="#45a3ff"/>
+    <circle cx="93" cy="426" r="7" fill="#87c7ff"/>
+    <path d="M79 447c3-10 25-10 28 0" fill="#87c7ff"/>
+    <text x="126" y="428" class="item-title">Administrators</text>
+    <text x="126" y="449" class="item-copy">Platform · SRE · FinOps</text>
+    <line x1="72" y1="475" x2="269" y2="475" stroke="#2d4d6c"/>
+    <text x="72" y="507" class="item-title">Intent</text>
+    <text x="125" y="507" class="item-copy">fairness · guardrails · capacity</text>
+    <text x="72" y="531" class="item-copy">No direct YAML required for daily operations</text>
+  </g>
+
+  <!-- QueueOps -->
+  <g>
+    <rect class="halo" x="348" y="352" width="302" height="266" rx="24" fill="none" stroke="#45a3ff" stroke-width="2"/>
+    <g class="node-pulse">
+      <rect x="356" y="360" width="54" height="54" rx="16" fill="#45a3ff"/>
+      <path d="M371 387h24M383 375v24" stroke="#071a30" stroke-width="4" stroke-linecap="round"/>
+    </g>
+    <text x="427" y="386" class="card-title">KAI QueueOps</text>
+    <text x="427" y="407" class="card-subtitle">Queue lifecycle control plane</text>
+    <g transform="translate(356 440)">
+      <rect width="137" height="70" rx="14" fill="#0a213d" stroke="#31557a"/>
+      <text x="15" y="27" class="item-title">Lifecycle</text>
+      <text x="15" y="49" class="item-copy">Create · Update · Delete</text>
+    </g>
+    <g transform="translate(507 440)">
+      <rect width="135" height="70" rx="14" fill="#0a213d" stroke="#31557a"/>
+      <text x="15" y="27" class="item-title">Resources</text>
+      <text x="15" y="49" class="item-copy">CPU · RAM · GPU · I/O</text>
+    </g>
+    <g transform="translate(356 524)">
+      <rect width="137" height="82" rx="14" fill="#0a213d" stroke="#31557a"/>
+      <text x="15" y="27" class="item-title">Governance</text>
+      <text x="15" y="49" class="item-copy">Hierarchy · Quotas</text>
+      <text x="15" y="66" class="item-copy">Limits · Oversubscription</text>
+    </g>
+    <g transform="translate(507 524)">
+      <rect width="135" height="82" rx="14" fill="#0a213d" stroke="#31557a"/>
+      <text x="15" y="27" class="item-title">Visibility</text>
+      <text x="15" y="49" class="item-copy">Demand · Allocation</text>
+      <text x="15" y="66" class="item-copy">Utilization · Events</text>
+    </g>
+  </g>
+
+  <!-- Kubernetes API -->
+  <g>
+    <text x="754" y="387" class="section">KUBERNETES API</text>
+    <g transform="translate(754 414)">
+      <rect width="210" height="52" rx="13" fill="#132f50" stroke="#396080"/>
+      <circle cx="25" cy="26" r="10" fill="#45a3ff" fill-opacity="0.2" stroke="#45a3ff"/>
+      <text x="46" y="23" class="item-title">Queue CRDs</text>
+      <text x="46" y="41" class="item-copy">scheduling.run.ai/v2</text>
+    </g>
+    <g transform="translate(754 479)">
+      <rect width="210" height="52" rx="13" fill="#132f50" stroke="#396080"/>
+      <circle cx="25" cy="26" r="10" fill="#f044a5" fill-opacity="0.2" stroke="#f044a5"/>
+      <text x="46" y="23" class="item-title">Pods &amp; Workloads</text>
+      <text x="46" y="41" class="item-copy">queue label + schedulerName</text>
+    </g>
+  </g>
+
+  <!-- KAI scheduler -->
+  <g>
+    <rect class="halo" x="1068" y="353" width="216" height="264" rx="24" fill="none" stroke="#f044a5" stroke-width="2"/>
+    <circle class="node-pulse" cx="1176" cy="398" r="30" fill="#f044a5"/>
+    <path d="M1160 400l10 10 22-25" fill="none" stroke="#081b31" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+    <text x="1176" y="452" text-anchor="middle" class="card-title">KAI Scheduler</text>
+    <text x="1176" y="477" text-anchor="middle" class="card-subtitle">Native scheduling engine</text>
+    <g transform="translate(1077 504)">
+      <rect width="198" height="96" rx="16" fill="#0c2948" stroke="#6f2d67"/>
+      <text x="99" y="28" text-anchor="middle" class="item-title">Fairness · Priority</text>
+      <text x="99" y="52" text-anchor="middle" class="item-title">Gang scheduling</text>
+      <text x="99" y="76" text-anchor="middle" class="item-title">Topology · Placement</text>
+    </g>
+  </g>
+
+  <!-- Cluster -->
+  <g>
+    <text x="1378" y="355" class="section">GKE / KUBERNETES</text>
+    <text x="1378" y="383" class="card-title">Cluster capacity</text>
+    <g transform="translate(1378 410)">
+      <rect width="150" height="62" rx="14" fill="#102d4e" stroke="#3b6688"/>
+      <text x="15" y="25" class="item-title">CPU pool</text>
+      <rect x="15" y="40" width="24" height="8" rx="4" fill="#45a3ff"/>
+      <rect x="44" y="40" width="24" height="8" rx="4" fill="#45a3ff"/>
+      <rect x="73" y="40" width="24" height="8" rx="4" fill="#45a3ff"/>
+      <rect class="resource-live" x="102" y="40" width="24" height="8" rx="4" fill="#45a3ff"/>
+    </g>
+    <g transform="translate(1378 487)">
+      <rect width="150" height="62" rx="14" fill="#102d4e" stroke="#3b6688"/>
+      <text x="15" y="25" class="item-title">GPU pool</text>
+      <rect x="15" y="40" width="24" height="8" rx="4" fill="#f044a5"/>
+      <rect x="44" y="40" width="24" height="8" rx="4" fill="#f044a5"/>
+      <rect class="resource-live delay-1" x="73" y="40" width="24" height="8" rx="4" fill="#f044a5"/>
+      <rect x="102" y="40" width="24" height="8" rx="4" fill="#6c4267"/>
+    </g>
+    <g transform="translate(1378 564)">
+      <rect width="150" height="62" rx="14" fill="#102d4e" stroke="#3b6688"/>
+      <text x="15" y="25" class="item-title">Memory &amp; I/O</text>
+      <rect x="15" y="40" width="24" height="8" rx="4" fill="#32d6a0"/>
+      <rect class="resource-live delay-2" x="44" y="40" width="24" height="8" rx="4" fill="#32d6a0"/>
+      <rect x="73" y="40" width="24" height="8" rx="4" fill="#32d6a0"/>
+      <rect x="102" y="40" width="24" height="8" rx="4" fill="#2a5e58"/>
+    </g>
+  </g>
+
+  <!-- Workloads -->
+  <g transform="translate(48 603)">
+    <rect width="245" height="128" rx="22" fill="#0d2746" stroke="#2c4c6c"/>
+    <text x="24" y="33" class="section">AI / ML WORKLOADS</text>
+    <g transform="translate(24 52)">
+      <rect width="92" height="27" rx="13.5" fill="#f044a5" fill-opacity="0.15" stroke="#f044a5" stroke-opacity="0.55"/>
+      <text x="46" y="18" text-anchor="middle" class="label" fill="#ff8dca">TRAINING</text>
+    </g>
+    <g transform="translate(126 52)">
+      <rect width="93" height="27" rx="13.5" fill="#f044a5" fill-opacity="0.15" stroke="#f044a5" stroke-opacity="0.55"/>
+      <text x="46.5" y="18" text-anchor="middle" class="label" fill="#ff8dca">INFERENCE</text>
+    </g>
+    <text x="24" y="106" class="item-copy">Jobs · Pods · Ray · PyTorch · Deployments</text>
+  </g>
+
+  <!-- Audit store -->
+  <g transform="translate(367 682)">
+    <rect width="264" height="76" rx="20" fill="#2b261c" stroke="#ffb84d" stroke-opacity="0.72"/>
+    <ellipse cx="38" cy="25" rx="16" ry="7" fill="#ffb84d" fill-opacity="0.25" stroke="#ffb84d"/>
+    <path d="M22 25v25c0 9 32 9 32 0V25" fill="none" stroke="#ffb84d" stroke-width="2"/>
+    <path d="M22 37c0 9 32 9 32 0M22 48c0 9 32 9 32 0" fill="none" stroke="#ffb84d" stroke-width="2"/>
+    <text x="71" y="31" class="item-title">PostgreSQL audit trail</text>
+    <text x="71" y="52" class="item-copy">Who · What · When · Before / After</text>
+  </g>
+
+  <!-- Flow paths -->
+  <path id="admin-policy" class="flow-line" d="M293 432 C312 432 315 432 330 432" stroke="#45a3ff" marker-end="url(#arrowBlue)"/>
+  <path id="queue-crd" class="flow-line" d="M668 402 C696 402 702 420 728 420" stroke="#45a3ff" marker-end="url(#arrowBlue)"/>
+  <path id="workload-submit" class="flow-line" d="M293 666 C470 666 600 668 674 612 C708 586 710 528 728 506" stroke="#f044a5" marker-end="url(#arrowPink)"/>
+  <path id="api-to-scheduler" class="flow-line" d="M990 505 C1015 505 1025 505 1049 505" stroke="#f044a5" marker-end="url(#arrowPink)"/>
+  <path id="scheduler-to-cluster" class="flow-line" d="M1303 505 C1324 505 1334 505 1354 505" stroke="#f044a5" marker-end="url(#arrowPink)"/>
+  <path id="cluster-status" class="flow-line slow" d="M1454 650 C1454 812 790 820 627 636" stroke="#32d6a0" marker-end="url(#arrowGreen)"/>
+  <path id="scheduler-status" class="flow-line slow" d="M1049 598 C922 670 770 675 655 614" stroke="#32d6a0" marker-end="url(#arrowGreen)"/>
+  <path id="audit-write" class="flow-line" d="M500 636 L500 682" stroke="#ffb84d" marker-end="url(#arrowAmber)"/>
+
+  <!-- Moving packets -->
+  <g fill="#45a3ff" filter="url(#blueGlow)">
+    <circle r="6"><animateMotion dur="2s" repeatCount="indefinite"><mpath href="#admin-policy"/></animateMotion></circle>
+    <circle r="6"><animateMotion dur="2.4s" begin="-1.2s" repeatCount="indefinite"><mpath href="#queue-crd"/></animateMotion></circle>
+  </g>
+  <g fill="#f044a5" filter="url(#pinkGlow)">
+    <circle r="6"><animateMotion dur="3.4s" repeatCount="indefinite"><mpath href="#workload-submit"/></animateMotion></circle>
+    <circle r="6"><animateMotion dur="1.8s" begin="-0.8s" repeatCount="indefinite"><mpath href="#api-to-scheduler"/></animateMotion></circle>
+    <circle r="6"><animateMotion dur="1.8s" begin="-1.3s" repeatCount="indefinite"><mpath href="#scheduler-to-cluster"/></animateMotion></circle>
+  </g>
+  <g fill="#32d6a0" filter="url(#greenGlow)">
+    <circle r="6"><animateMotion dur="5.6s" repeatCount="indefinite"><mpath href="#cluster-status"/></animateMotion></circle>
+    <circle r="5"><animateMotion dur="3.2s" begin="-1.4s" repeatCount="indefinite"><mpath href="#scheduler-status"/></animateMotion></circle>
+  </g>
+  <g fill="#ffb84d" filter="url(#greenGlow)">
+    <circle r="5"><animateMotion dur="1.8s" repeatCount="indefinite"><mpath href="#audit-write"/></animateMotion></circle>
+  </g>
+
+  <!-- Path labels -->
+  <g>
+    <rect x="677" y="316" width="116" height="25" rx="12" fill="#0b213d" stroke="#45a3ff" stroke-opacity="0.55"/>
+    <text x="735" y="333" text-anchor="middle" class="label" fill="#87c7ff">APPLY POLICY</text>
+    <rect x="541" y="646" width="126" height="25" rx="12" fill="#0b213d" stroke="#f044a5" stroke-opacity="0.55"/>
+    <text x="604" y="663" text-anchor="middle" class="label" fill="#ff8dca">SUBMIT WORK</text>
+    <rect x="971" y="724" width="140" height="25" rx="12" fill="#0b213d" stroke="#32d6a0" stroke-opacity="0.55"/>
+    <text x="1041" y="741" text-anchor="middle" class="label" fill="#77e8c0">OBSERVE STATUS</text>
+  </g>
+
+  <g transform="translate(48 837)">
+    <text class="item-copy">KAI QueueOps manages and observes queue policy. KAI Scheduler remains the component that places workloads.</text>
+  </g>
+  <text x="1552" y="852" text-anchor="end" class="item-copy">Open source · Apache-2.0</text>
+</svg>
